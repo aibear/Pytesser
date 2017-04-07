@@ -14,6 +14,8 @@ from subprocess import Popen, PIPE
 import os
 
 PROG_NAME = 'tesseract'
+# MAC :  you should write down the full path to tesseract
+#PROG_NAME = '/usr/local/Cellar/tesseract/3.05.00/bin/tesseract'
 TEMP_IMAGE = 'tmp.bmp'
 TEMP_FILE = 'tmp'
 
