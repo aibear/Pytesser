@@ -13,7 +13,11 @@ except ImportError:
 from subprocess import Popen, PIPE
 import os
 
-PROG_NAME = 'tesseract'
+
+# MAC :  you should write down the full path to tesseract
+PROG_NAME = '/usr/local/Cellar/tesseract/3.05.00/bin/tesseract'
+
+
 TEMP_IMAGE = 'tmp.bmp'
 TEMP_FILE = 'tmp'
 
@@ -33,15 +37,15 @@ PSM_SINGLE_CHAR = 10
 class TesseractException(Exception): #Raised when tesseract does not return 0
     pass
 
-class TesseractNotFound(Exception): #When tesseract is not found in the path
-    pass
-
-def check_path(): #Check if tesseract is in the path raise TesseractNotFound otherwise
-    for path in os.environ.get('PATH', '').split(':'):
-        filepath = os.path.join(path, PROG_NAME)
-        if os.path.exists(filepath) and not os.path.isdir(filepath):
-            return True
-    raise TesseractNotFound
+# class TesseractNotFound(Exception): #When tesseract is not found in the path
+#     pass
+#
+# def check_path(): #Check if tesseract is in the path raise TesseractNotFound otherwise
+#     for path in os.environ.get('PATH', '').split(':'):
+#         filepath = os.path.join(path, PROG_NAME)
+#         if os.path.exists(filepath) and not os.path.isdir(filepath):
+#             return True
+#     raise TesseractNotFound
 
 def process_request(input_file, output_file, lang=None, psm=None):
     args = [PROG_NAME, input_file, output_file] #Create the arguments
@@ -57,15 +61,15 @@ def process_request(input_file, output_file, lang=None, psm=None):
     code = proc.returncode
     if code != 0:
         if code == 2:
-            raise TesseractException, "File not found"
+            raise TesseractException("File not found")
         if code == -11:
-            raise TesseractException, "Language code invalid: "+ret[1]
+            raise TesseractException("Language code invalid: "+ret[1])
         else:
-            raise TesseractException, ret[1]
+            raise (TesseractException, ret[1])
 
 def iplimage_to_string(im, lang=None, psm=None):
     if not OPENCV_AVAILABLE:
-        print "OpenCV not Available"
+        print ("OpenCV not Available")
         return -1
     else:
         cv.SaveImage(TEMP_IMAGE, im)
@@ -73,18 +77,21 @@ def iplimage_to_string(im, lang=None, psm=None):
         os.remove(TEMP_IMAGE)
         return txt
 
-def image_to_string(file,lang=None, psm=None):
-    check_path() #Check if tesseract available in the path
-    process_request(file, TEMP_FILE, lang, psm) #Process command
-    f = open(TEMP_FILE+".txt","r") #Open back the file
+def image_to_string(file,lang=None, psm=None,delt=False):
+    # check_path() #Check if tesseract available in the path
+    print(file)
+    filename=file.split('.')[0]
+    process_request(file, filename, lang, psm) #Process command
+    f = open(filename+".txt","r") #Open back the file
     txt = f.read()
     f.close()
-    os.remove(TEMP_FILE+".txt")
+    if delt:
+        os.remove(filename + ".txt")
     return txt
 
 def mat_to_string(im, lang=None, psm=None):
     if not OPENCV2_AVAILABLE:
-        print "cv2 is not Available"
+        print ("cv2 is not Available")
         return -1
     else:
         cv2.imwrite(TEMP_IMAGE, im)
@@ -92,5 +99,6 @@ def mat_to_string(im, lang=None, psm=None):
         os.remove(TEMP_IMAGE)
         return txt
 
+
 if __name__ =='__main__':
-    print image_to_string("image.jpg", "fra", PSM_AUTO) #Example
+    print (image_to_string("6.jpg", "rus", PSM_AUTO) )#Example
